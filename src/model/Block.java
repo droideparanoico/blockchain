@@ -2,18 +2,20 @@ package model;
 
 import static java.lang.String.valueOf;
 
+import util.HashFunction;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Random;
-import util.HashFunction;
 
-public class Block {
+public class Block implements Serializable {
 
+  private static final long serialVersionUID = 1L;
   private final String previousBlockHash;
   private final int id;
   private final int hashZeroes;
   private final long timeStamp;
   private final String blockHash;
-  private final Random random = new Random();
+  private final transient Random random = new Random();
   private int magicNumber;
   private float generationSecs = 0;
 
@@ -38,7 +40,7 @@ public class Block {
     var hash = "";
     do {
       hash = HashFunction.applySha256(this.id + valueOf(this.timeStamp) + calculateMagicNumber());
-    } while (!hash.matches("(?s)0{"+hashZeroes+"}([^0].*)?"));
+    } while (!hash.matches("(?s)0{" + hashZeroes + "}([^0].*)?"));
     final long end = System.currentTimeMillis();
     generationSecs = (end - start) / 1000F;
     return hash;
@@ -51,11 +53,11 @@ public class Block {
 
   public String toString() {
     return "Block: " + "\n"
-        +"Id: " + this.id + "\n"
-        +"Timestamp: " + this.timeStamp + "\n"
-        +"Magic number: " + this.magicNumber + "\n"
-        +"Hash of the previous block: " + "\n" + this.previousBlockHash + "\n"
-        +"Hash of the block: \n" + this.blockHash + "\n"
-        +"Block was generating for: " + this.generationSecs + " seconds" + "\n";
+        + "Id: " + this.id + "\n"
+        + "Timestamp: " + this.timeStamp + "\n"
+        + "Magic number: " + this.magicNumber + "\n"
+        + "Hash of the previous block: " + "\n" + this.previousBlockHash + "\n"
+        + "Hash of the block: \n" + this.blockHash + "\n"
+        + "Block was generating for: " + this.generationSecs + " seconds" + "\n";
   }
 }

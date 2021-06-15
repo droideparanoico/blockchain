@@ -8,9 +8,11 @@ public final class Main {
         System.out.print("Enter how many zeros the hash must start with: ");
         final var hashZeroes = sc.nextInt();
         final var blockChain = new BlockChain(hashZeroes);
+        blockChain.load();
 
-        IntStream.range(0, 5).forEach(blockChain::addBlock);
+        IntStream.range(0, 5).forEach(block -> blockChain.addBlock());
 
         System.out.println(blockChain);
+        blockChain.save();
     }
 }

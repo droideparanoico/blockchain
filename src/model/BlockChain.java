@@ -1,5 +1,6 @@
 package model;
 
+import util.FileManagement;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,9 +13,10 @@ public class BlockChain {
     this.hashZeroes = hashZeroes;
   }
 
-  public void addBlock(final int id) {
-    final String previousBlockHash = (id > 0) ? blockList.get(id - 1).getBlockHash() : "0";
-    blockList.add(new Block(previousBlockHash, id, hashZeroes));
+  public void addBlock() {
+    final int nextId = blockList.size();
+    final String previousBlockHash = (nextId > 0) ? blockList.get(nextId - 1).getBlockHash() : "0";
+    blockList.add(new Block(previousBlockHash, nextId, hashZeroes));
   }
 
   public boolean validateBlockchain() {
@@ -40,5 +42,13 @@ public class BlockChain {
       System.out.println("Blockchain invalid!");
     }
     return blockList.stream().map(Block::toString).collect(Collectors.joining("\n"));
+  }
+
+  public void load() {
+    FileManagement.loadBlockchain(blockList);
+  }
+
+  public void save() {
+    FileManagement.saveBlockchain(blockList);
   }
 }
