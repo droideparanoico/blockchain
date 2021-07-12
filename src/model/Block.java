@@ -11,6 +11,7 @@ public class Block implements Serializable {
 
   private static final long serialVersionUID = 1L;
   private final String previousBlockHash;
+  private final int minerId;
   private final int id;
   private final int hashZeroes;
   private final long timeStamp;
@@ -19,8 +20,9 @@ public class Block implements Serializable {
   private int magicNumber;
   private float generationSecs = 0;
 
-  public Block(final String previousBlockHash, final int id, final int hashZeroes) {
+  public Block(final String previousBlockHash,final int minerId, final int id, final int hashZeroes) {
     this.previousBlockHash = previousBlockHash;
+    this.minerId = minerId;
     this.id = id;
     this.hashZeroes = hashZeroes;
     this.timeStamp = new Date().getTime();
@@ -53,6 +55,7 @@ public class Block implements Serializable {
 
   public String toString() {
     return "Block: " + "\n"
+        + "Created by miner #" + this.minerId + "\n"
         + "Id: " + this.id + "\n"
         + "Timestamp: " + this.timeStamp + "\n"
         + "Magic number: " + this.magicNumber + "\n"
@@ -61,3 +64,4 @@ public class Block implements Serializable {
         + "Block was generating for: " + this.generationSecs + " seconds" + "\n";
   }
 }
+

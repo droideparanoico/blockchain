@@ -13,10 +13,10 @@ public class BlockChain {
     this.hashZeroes = hashZeroes;
   }
 
-  public void addBlock() {
+  public synchronized void addBlock(final int minerId) {
     final int nextId = blockList.size();
     final String previousBlockHash = (nextId > 0) ? blockList.get(nextId - 1).getBlockHash() : "0";
-    blockList.add(new Block(previousBlockHash, nextId, hashZeroes));
+    blockList.add(new Block(previousBlockHash, minerId, nextId, hashZeroes));
   }
 
   public boolean validateBlockchain() {
