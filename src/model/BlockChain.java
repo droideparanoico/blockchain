@@ -6,17 +6,32 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class BlockChain {
-  private final int hashZeroes;
-  private static final List<Block> blockList = new LinkedList<>();
 
-  public BlockChain(final int hashZeroes) {
-    this.hashZeroes = hashZeroes;
-  }
+  private int hashZeroes;
+  private static final List<Block> blockList = new LinkedList<>();
 
   public synchronized void addBlock(final int minerId) {
     final int nextId = blockList.size();
     final String previousBlockHash = (nextId > 0) ? blockList.get(nextId - 1).getBlockHash() : "0";
-    blockList.add(new Block(previousBlockHash, minerId, nextId, hashZeroes));
+
+    final var block = new Block(previousBlockHash, minerId, nextId, hashZeroes);
+    blockList.add(block);
+
+    final float generationTime = blockList.get(nextId).getGenerationSecs();
+    final String CASE;
+
+    if (generationTime < 10) {
+      hashZeroes += 1;
+      CASE = "N was increased to " + hashZeroes + "\n";
+    } else if (generationTime > 60) {
+      hashZeroes -= 1;
+      CASE = "N was decreased by 1" + "\n";
+    } else {
+      CASE = "N stays the same";
+    }
+
+    System.out.println(block);
+    System.out.println(CASE);
   }
 
   public boolean validateBlockchain() {
@@ -51,4 +66,5 @@ public class BlockChain {
   public void save() {
     FileManagement.saveBlockchain(blockList);
   }
+
 }

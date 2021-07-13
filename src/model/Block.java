@@ -37,6 +37,10 @@ public class Block implements Serializable {
     return previousBlockHash;
   }
 
+  public float getGenerationSecs() {
+    return generationSecs;
+  }
+
   private String calculateBlockHash() {
     final long start = System.currentTimeMillis();
     var hash = "";
@@ -61,7 +65,7 @@ public class Block implements Serializable {
         + "Magic number: " + this.magicNumber + "\n"
         + "Hash of the previous block: " + "\n" + this.previousBlockHash + "\n"
         + "Hash of the block: \n" + this.blockHash + "\n"
-        + "Block was generating for: " + this.generationSecs + " seconds" + "\n";
+        + "Block was generating for " + this.generationSecs + " seconds";
   }
-}
 
+}

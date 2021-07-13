@@ -1,6 +1,6 @@
 package model;
 
-public class Miner extends Thread {
+public class Miner implements Runnable {
 
   private final int minerId;
   private final BlockChain blockChain;
@@ -14,4 +14,5 @@ public class Miner extends Thread {
   public void run() {
     blockChain.addBlock(minerId);
   }
+
 }
