@@ -1,46 +1,80 @@
 package model;
 
 import util.FileManagement;
-import java.util.LinkedList;
-import java.util.List;
+import util.HashFunction;
+
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.lang.String.valueOf;
 
 public class BlockChain {
 
+  private final Random random = new Random();
+  private final List<Block> blockList = new LinkedList<>();
+  private final List<String> chatMessages = new ArrayList<>();
   private int hashZeroes;
-  private static final List<Block> blockList = new LinkedList<>();
+  private int magicNumber;
+  private float generationSecs = 0;
 
   public synchronized void addBlock(final int minerId) {
     final int nextId = blockList.size();
     final String previousBlockHash = (nextId > 0) ? blockList.get(nextId - 1).getBlockHash() : "0";
+    final String blockHash = calculateBlockHash(minerId);
 
-    final var block = new Block(previousBlockHash, minerId, nextId, hashZeroes);
+    final var block = new Block(
+            previousBlockHash,
+            blockHash,
+            minerId,
+            nextId,
+            magicNumber,
+            generationSecs,
+            chatMessages
+    );
     blockList.add(block);
+    System.out.println(block);
+    this.chatMessages.clear();
 
-    final float generationTime = blockList.get(nextId).getGenerationSecs();
-    final String CASE;
-
-    if (generationTime < 10) {
+    if (generationSecs < 1) {
       hashZeroes += 1;
-      CASE = "N was increased to " + hashZeroes + "\n";
-    } else if (generationTime > 60) {
+      System.out.println("N was increased to " + hashZeroes +"\n");
+    } else if (generationSecs > 10) {
       hashZeroes -= 1;
-      CASE = "N was decreased by 1" + "\n";
+      System.out.println("N was decreased by 1\n");
     } else {
-      CASE = "N stays the same";
+      System.out.println("N stays the same\n");
     }
 
-    System.out.println(block);
-    System.out.println(CASE);
   }
 
-  public boolean validateBlockchain() {
+  public void acceptMessage(String message) {
+    if (!blockList.isEmpty()) {
+      chatMessages.add(message);
+    }
+  }
+
+  public void load() {
+    FileManagement.loadBlockchain(blockList);
+  }
+
+  public void save() {
+    FileManagement.saveBlockchain(blockList);
+  }
+
+  public String toString() {
+    if (!validateBlockchain()) {
+      System.out.println("Blockchain invalid!");
+    }
+    return blockList.stream().map(Block::toString).collect(Collectors.joining("\n"));
+  }
+
+  private boolean validateBlockchain() {
     if (blockList.isEmpty()) {
       return true;
     }
 
     final List<String> previousHashes = blockList.stream().map(Block::getPreviousBlockHash).collect(
-        Collectors.toList());
+            Collectors.toList());
     final List<String> hashes = blockList.stream().map(Block::getBlockHash).collect(Collectors.toList());
 
     for (var index = 1; index < hashes.size(); index++) {
@@ -52,19 +86,23 @@ public class BlockChain {
     return true;
   }
 
-  public String toString() {
-    if (!validateBlockchain()) {
-      System.out.println("Blockchain invalid!");
-    }
-    return blockList.stream().map(Block::toString).collect(Collectors.joining("\n"));
+  private String calculateBlockHash(final int minerId) {
+    final long start = System.currentTimeMillis();
+    var hash = "";
+    do {
+      hash = HashFunction.applySha256(minerId
+              + valueOf(new Date().getTime())
+              + calculateMagicNumber()
+      );
+    } while (!hash.matches("(?s)0{" + hashZeroes + "}([^0].*)?"));
+    final long end = System.currentTimeMillis();
+    generationSecs = (end - start) / 1000F;
+    return hash;
   }
 
-  public void load() {
-    FileManagement.loadBlockchain(blockList);
-  }
-
-  public void save() {
-    FileManagement.saveBlockchain(blockList);
+  private int calculateMagicNumber() {
+    magicNumber = random.nextInt();
+    return magicNumber;
   }
 
 }
