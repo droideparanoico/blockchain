@@ -1,9 +1,11 @@
+import java.io.File;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 import model.BlockChain;
 import model.ChatClient;
 import model.Miner;
+import util.Security;
 
 public final class Main {
 
@@ -11,6 +13,14 @@ public final class Main {
         final var nThreads = Runtime.getRuntime().availableProcessors();
         final var blockChain = new BlockChain();
         blockChain.load();
+
+        // Cryptographic keys management
+        final File publicKey = new File(Security.PUBLIC_KEY);
+        final File privateKey = new File(Security.PRIVATE_KEY);
+
+        if (!publicKey.exists() || !privateKey.exists()) {
+            Security.generateKeys();
+        }
 
         final var chatExecutor = Executors.newScheduledThreadPool(nThreads);
 
@@ -21,8 +31,8 @@ public final class Main {
 
         final var minerExecutor = Executors.newFixedThreadPool(nThreads);
 
-        // Creation of 5 miners
-        IntStream.range(0, 5)
+        // Creation of 10 miners
+        IntStream.range(0, 10)
                 .mapToObj(minerId -> new Miner(minerId, blockChain))
                 .forEach(minerExecutor::submit);
 

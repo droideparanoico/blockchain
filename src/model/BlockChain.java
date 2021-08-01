@@ -2,6 +2,7 @@ package model;
 
 import util.FileManagement;
 import util.HashFunction;
+import util.Security;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,7 +13,7 @@ public class BlockChain {
 
   private final Random random = new Random();
   private final List<Block> blockList = new LinkedList<>();
-  private final List<String> chatMessages = new ArrayList<>();
+  private final List<Message> chatMessages = new ArrayList<>();
   private int hashZeroes;
   private int magicNumber;
   private float generationSecs = 0;
@@ -47,10 +48,18 @@ public class BlockChain {
 
   }
 
-  public void acceptMessage(String message) {
-    if (!blockList.isEmpty()) {
+  public void acceptMessage(Message message) {
+    if (!blockList.isEmpty() || message.getId() > getLastMessageId()) {
       chatMessages.add(message);
     }
+  }
+
+  public int getLastMessageId() {
+    return blockList.stream()
+            .map(Block::getMessages)
+            .flatMap(Collection::stream)
+            .mapToInt(Message::getId)
+            .max().orElse(0);
   }
 
   public void load() {
@@ -73,9 +82,14 @@ public class BlockChain {
       return true;
     }
 
-    final List<String> previousHashes = blockList.stream().map(Block::getPreviousBlockHash).collect(
-            Collectors.toList());
-    final List<String> hashes = blockList.stream().map(Block::getBlockHash).collect(Collectors.toList());
+    //TODO implement message validation
+
+    final List<String> previousHashes = blockList.stream()
+            .map(Block::getPreviousBlockHash)
+            .collect(Collectors.toList());
+    final List<String> hashes = blockList.stream()
+            .map(Block::getBlockHash)
+            .collect(Collectors.toList());
 
     for (var index = 1; index < hashes.size(); index++) {
       if (!previousHashes.get(index).equals(hashes.get(index - 1))) {
@@ -84,6 +98,11 @@ public class BlockChain {
     }
 
     return true;
+  }
+
+  private boolean messageIsValid(Message msg) {
+    //TODO correct signature issues
+    return Security.verifySignature(msg.getId() + msg.getText(), msg.getSignature(), msg.getPublicKey());
   }
 
   private String calculateBlockHash(final int minerId) {

@@ -14,7 +14,7 @@ public class Block implements Serializable {
   private final int id;
   private final int magicNumber;
   private final float generationSecs;
-  private final List<String> chatMessages;
+  private final List<Message> chatMessages;
   private final long timeStamp;
 
   public Block(
@@ -24,7 +24,7 @@ public class Block implements Serializable {
           final int id,
           final int magicNumber,
           final float generationSecs,
-          final List<String> chatMessages
+          final List<Message> chatMessages
   ) {
     this.previousBlockHash = previousBlockHash;
     this.blockHash = blockHash;
@@ -53,14 +53,18 @@ public class Block implements Serializable {
             + "Hash of the previous block: " + "\n" + this.previousBlockHash + "\n"
             + "Hash of the block: \n" + this.blockHash + "\n"
             + "Block data: \n"
-            + getMessages()
+            + messagesToString()
             + "Block was generating for " + this.generationSecs + " seconds";
   }
 
-  public String getMessages() {
+  public String messagesToString() {
     return chatMessages.stream()
-            .map(m -> m.concat("\n"))
+            .map(m -> m.getText().concat("\n"))
             .collect(Collectors.joining());
+  }
+
+  public List<Message> getMessages() {
+    return chatMessages;
   }
 
 }
