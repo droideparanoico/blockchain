@@ -1,43 +1,37 @@
 package util;
 
-import model.Block;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.List;
 
 public final class FileManagement {
 
   private static final String BLOCKCHAIN = "blockChain.txt";
 
-  public static void saveBlockchain(final List<Block> blockList) {
-    final var blockChainFile = new File(BLOCKCHAIN);
-    try (final var fileOut = new FileOutputStream(blockChainFile);
-         final var objectOut = new ObjectOutputStream(fileOut)) {
-      for (final var block : blockList) {
-        objectOut.writeObject(block);
-      }
-    } catch (final IOException e) {
-      e.printStackTrace();
-    }
+  private FileManagement() {
+    throw new IllegalStateException("FileManagement class");
   }
 
-  public static void loadBlockchain(final List<Block> blockList) {
-    final var blockChainFile = new File(BLOCKCHAIN);
-    if (blockChainFile.exists()) {
-      try (final var fileIn = new FileInputStream(blockChainFile);
-           final var objectIn = new ObjectInputStream(fileIn)) {
-        while (fileIn.available() > 0) {
-          final var object = objectIn.readObject();
-          blockList.add((Block) object);
-        }
-      } catch (final IOException | ClassNotFoundException e) {
-        e.printStackTrace();
-      }
-    }
+  public static void saveBlockChain(final Object obj) throws IOException {
+    final FileOutputStream fos = new FileOutputStream(BLOCKCHAIN);
+    final BufferedOutputStream bos = new BufferedOutputStream(fos);
+    final ObjectOutputStream oos = new ObjectOutputStream(bos);
+    oos.writeObject(obj);
+    oos.close();
+  }
+
+  public static Object loadBlockChain() throws IOException, ClassNotFoundException {
+    final FileInputStream fis = new FileInputStream(BLOCKCHAIN);
+    final BufferedInputStream bis = new BufferedInputStream(fis);
+    final ObjectInputStream ois = new ObjectInputStream(bis);
+    final Object obj = ois.readObject();
+    ois.close();
+    return obj;
   }
 
   public static void saveKey(final String path, final byte[] key) throws IOException {

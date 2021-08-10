@@ -7,14 +7,19 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import model.Message;
 
 public final class Security {
 
     public static final String PRIVATE_KEY = "KeyPair/privateKey";
     public static final String PUBLIC_KEY = "KeyPair/publicKey";
 
+    private Security() {
+        throw new IllegalStateException("Security class");
+    }
+
     public static PublicKey getPublic()
-            throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
+        throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
         final byte[] keyBytes = Files.readAllBytes(new File(PUBLIC_KEY).toPath());
         final X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
         final KeyFactory kf = KeyFactory.getInstance("RSA");
@@ -22,7 +27,7 @@ public final class Security {
     }
 
     public static PrivateKey getPrivate()
-            throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
+        throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
         final byte[] keyBytes = Files.readAllBytes(new File(PRIVATE_KEY).toPath());
         final PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
         final KeyFactory kf = KeyFactory.getInstance("RSA");
@@ -30,11 +35,15 @@ public final class Security {
     }
 
     public static byte[] sign(final String data, final PrivateKey privateKey)
-            throws NoSuchAlgorithmException, InvalidKeyException, SignatureException  {
+        throws NoSuchAlgorithmException, InvalidKeyException, SignatureException  {
         final Signature rsa = Signature.getInstance("SHA1withRSA");
         rsa.initSign(privateKey);
         rsa.update(data.getBytes());
         return rsa.sign();
+    }
+
+    public static boolean messageIsValid(final Message msg) {
+        return Security.verifySignature(msg.getId() + msg.getText(), msg.getSignature(), msg.getPublicKey());
     }
 
     public static boolean verifySignature(final String data, final byte[] signature, final PublicKey publicKey) {

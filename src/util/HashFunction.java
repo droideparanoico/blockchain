@@ -4,6 +4,11 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
 public final class HashFunction {
+
+  private HashFunction() {
+    throw new IllegalStateException("HashFunction class");
+  }
+
   /* Applies Sha256 to a string and returns a hash. */
   public static String applySha256(final String input) throws RuntimeException {
     try {
@@ -22,4 +27,5 @@ public final class HashFunction {
       throw new RuntimeException(e);
     }
   }
+
 }

@@ -1,18 +1,20 @@
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 import model.BlockChain;
-import model.ChatClient;
+import util.ChatClient;
 import model.Miner;
+import util.FileManagement;
 import util.Security;
 
 public final class Main {
 
-    public static void main(final String[] args) throws InterruptedException {
+    public static void main(final String[] args) throws InterruptedException, IOException {
+
         final var nThreads = Runtime.getRuntime().availableProcessors();
-        final var blockChain = new BlockChain();
-        blockChain.load();
+        final var blockChain = BlockChain.getInstance();
 
         // Cryptographic keys management
         final File publicKey = new File(Security.PUBLIC_KEY);
@@ -24,17 +26,15 @@ public final class Main {
 
         final var chatExecutor = Executors.newScheduledThreadPool(nThreads);
 
-        // Mocks 3 chat clients who send messages to the blockchain
-        IntStream.range(0, 3)
-                .mapToObj(chatClientId -> new ChatClient(chatClientId, blockChain))
-                .forEach(e -> chatExecutor.scheduleAtFixedRate(e, 0, 100, TimeUnit.MILLISECONDS));
+        // Mocks a chat client who send messages to the blockchain
+        chatExecutor.scheduleAtFixedRate(new ChatClient(blockChain), 0, 200, TimeUnit.MILLISECONDS);
 
         final var minerExecutor = Executors.newFixedThreadPool(nThreads);
 
-        // Creation of 10 miners
-        IntStream.range(0, 10)
-                .mapToObj(minerId -> new Miner(minerId, blockChain))
-                .forEach(minerExecutor::submit);
+        // Creation of 5 miners
+        IntStream.range(0, 5)
+            .mapToObj(minerId -> new Miner(minerId, blockChain))
+            .forEach(minerExecutor::submit);
 
         minerExecutor.shutdown();
 
@@ -48,8 +48,8 @@ public final class Main {
             chatExecutor.shutdownNow();
         }
 
-        blockChain.save();
+        FileManagement.saveBlockChain(blockChain);
+
     }
 
 }
-
