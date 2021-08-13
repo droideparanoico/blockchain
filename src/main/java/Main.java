@@ -4,7 +4,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 import model.BlockChain;
-import util.ChatClient;
+import util.TransactionsGenerator;
 import model.Miner;
 import util.FileManagement;
 import util.Security;
@@ -24,15 +24,15 @@ public final class Main {
             Security.generateKeys();
         }
 
-        final var chatExecutor = Executors.newScheduledThreadPool(nThreads);
+        final var transactionsExecutor = Executors.newScheduledThreadPool(nThreads);
 
-        // Mocks a chat client who send messages to the blockchain
-        chatExecutor.scheduleAtFixedRate(new ChatClient(blockChain), 0, 200, TimeUnit.MILLISECONDS);
+        // Mocks a generator to send transactions into the blockchain
+        transactionsExecutor.scheduleAtFixedRate(new TransactionsGenerator(blockChain), 0, 200, TimeUnit.MILLISECONDS);
 
         final var minerExecutor = Executors.newFixedThreadPool(nThreads);
 
-        // Creation of 5 miners
-        IntStream.range(0, 5)
+        // Creation of 15 miners
+        IntStream.range(0, 15)
             .mapToObj(minerId -> new Miner(minerId, blockChain))
             .forEach(minerExecutor::submit);
 
@@ -42,10 +42,10 @@ public final class Main {
             minerExecutor.shutdownNow();
         }
 
-        chatExecutor.shutdown();
+        transactionsExecutor.shutdown();
 
-        if (!chatExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
-            chatExecutor.shutdownNow();
+        if (!transactionsExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
+            transactionsExecutor.shutdownNow();
         }
 
         FileManagement.saveBlockChain(blockChain);

@@ -1,0 +1,18 @@
+apply plugin: 'idea'
+apply plugin: 'java'
+
+repositories {
+    maven {
+        url 'https://repo.maven.apache.org/maven2'
+        name 'Maven Central'
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+}

@@ -7,7 +7,7 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import model.Message;
+import model.Transaction;
 
 public final class Security {
 
@@ -42,7 +42,7 @@ public final class Security {
         return rsa.sign();
     }
 
-    public static boolean messageIsValid(final Message msg) {
+    public static boolean messageIsValid(final Transaction msg) {
         return Security.verifySignature(msg.getId() + msg.getText(), msg.getSignature(), msg.getPublicKey());
     }
 

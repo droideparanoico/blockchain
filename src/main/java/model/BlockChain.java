@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import util.FileManagement;
 import util.HashFunction;
 import util.Security;
+import exceptions.NotEnoughCoinsException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,8 +25,10 @@ public class BlockChain implements Serializable {
 
   private final Random random = new Random();
   private final List<Block> blockList = new LinkedList<>();
-  private final List<Message> incomingChatMessages = new ArrayList<>();
-  private final AtomicInteger lastMessageId = new AtomicInteger(1);
+  private final List<Transaction> incomingTransactions = new ArrayList<>();
+  private final AtomicInteger lastTransactionId = new AtomicInteger(1);
+  private final Map<Integer,Integer> minersCoins = new HashMap<>();
+  private final Map<String,Integer> usersCoins = new HashMap<>();
 
   private int hashZeroes;
   private int magicNumber;
@@ -50,7 +53,7 @@ public class BlockChain implements Serializable {
     final String previousBlockHash = (nextId > 0) ? blockList.get(nextId - 1).getBlockHash() : "0";
     final String blockHash = calculateBlockHash(minerId);
 
-    incomingChatMessages.sort(Comparator.comparingInt(Message::getId));
+    incomingTransactions.sort(Comparator.comparingInt(Transaction::getId));
 
     final var block = new Block(
         previousBlockHash,
@@ -59,11 +62,12 @@ public class BlockChain implements Serializable {
         nextId,
         magicNumber,
         generationSecs,
-        incomingChatMessages
+        incomingTransactions
     );
     blockList.add(block);
+    minersCoins.put(minerId, 100);
     System.out.println(block);
-    incomingChatMessages.clear();
+    incomingTransactions.clear();
 
     if (generationSecs < LOWER_LIMIT_SECS) {
       hashZeroes += 1;
@@ -77,19 +81,52 @@ public class BlockChain implements Serializable {
 
   }
 
-  public int getNextMessageId() {
-    return lastMessageId.getAndIncrement();
+  public void acceptTransaction(
+      final int nextTransactionId,
+      final String sender,
+      final int amount,
+      final String receiver
+  ) throws
+      NoSuchAlgorithmException,
+      SignatureException,
+      InvalidKeyException,
+      IOException,
+      InvalidKeySpecException,
+      NotEnoughCoinsException
+  {
+    if (usersCoins.get(sender) <= 0 || usersCoins.get(sender) < amount) {
+      throw new NotEnoughCoinsException(sender);
+    } else {
+      transferCoins(sender, amount, receiver);
+      incomingTransactions.add(new Transaction(
+          nextTransactionId,
+          sender,
+          amount,
+          receiver,
+          Security.getPrivate(),
+          Security.getPublic()
+      ));
+    }
   }
 
-  public void acceptText(final int nextMessageId, final String name, final String text)
-      throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, IOException, InvalidKeySpecException {
-    incomingChatMessages.add(new Message(
-        nextMessageId,
-        name,
-        text,
-        Security.getPrivate(),
-        Security.getPublic()
-    ));
+  public void acceptUser(final String username, final int coins){
+    usersCoins.put(username, coins);
+  }
+
+  public void transferCoins(final String sender, final int amount, final String receiver) {
+    final int prevSenderCoins = usersCoins.get(sender);
+    final int prevReceiverCoins = usersCoins.get(receiver);
+
+    usersCoins.put(sender, prevSenderCoins - amount);
+    usersCoins.put(receiver, prevReceiverCoins + amount);
+  }
+
+  public Map<String, Integer> getUsersCoins() {
+    return usersCoins;
+  }
+
+  public int getNextTransactionId() {
+    return lastTransactionId.getAndIncrement();
   }
 
   public boolean validateBlockchain() {
@@ -109,13 +146,13 @@ public class BlockChain implements Serializable {
     if (!blockList.stream()
         .map(Block::getMessages)
         .flatMap(Collection::stream)
-        .map(Message::getId)
+        .map(Transaction::getId)
         .sorted()
         .collect(Collectors.toList())
         .equals(blockList.stream()
             .map(Block::getMessages)
             .flatMap(Collection::stream)
-            .map(Message::getId)
+            .map(Transaction::getId)
             .collect(Collectors.toList())
         )
     ) {

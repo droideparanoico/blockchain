@@ -5,7 +5,7 @@ import util.Security;
 import java.io.Serializable;
 import java.security.*;
 
-public class Message implements Serializable  {
+public class Transaction implements Serializable  {
 
     private static final long serialVersionUID = 1L;
 
@@ -14,10 +14,16 @@ public class Message implements Serializable  {
     private final byte[] signature;
     private final PublicKey publicKey;
 
-    public Message(final int id, final String name, final String text, final PrivateKey privateKey, final PublicKey publicKey)
-        throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    public Transaction(
+        final int id,
+        final String sender,
+        final int amount,
+        final String receiver,
+        final PrivateKey privateKey,
+        final PublicKey publicKey
+    ) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         this.id = id;
-        this.text = "Chatter " + name + " says: " + text;
+        this.text = sender + " sent " + amount + " VC to " + receiver;
         this.signature = Security.sign(text, privateKey);
         this.publicKey = publicKey;
     }

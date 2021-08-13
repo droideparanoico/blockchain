@@ -15,7 +15,7 @@ public class Block implements Serializable {
   private final int id;
   private final int magicNumber;
   private final float generationSecs;
-  private final List<Message> chatMessages;
+  private final List<Transaction> transactions;
   private final long timeStamp;
 
   public Block(
@@ -25,7 +25,7 @@ public class Block implements Serializable {
       final int id,
       final int magicNumber,
       final float generationSecs,
-      final List<Message> blockMessages
+      final List<Transaction> blockTransactions
   ) {
     this.previousBlockHash = previousBlockHash;
     this.blockHash = blockHash;
@@ -33,7 +33,7 @@ public class Block implements Serializable {
     this.id = id;
     this.magicNumber = magicNumber;
     this.generationSecs = generationSecs;
-    this.chatMessages = blockMessages;
+    this.transactions = blockTransactions;
     this.timeStamp = new Date().getTime();
   }
 
@@ -48,6 +48,7 @@ public class Block implements Serializable {
   public String toString() {
     return "Block: " + "\n"
         + "Created by miner #" + this.minerId + "\n"
+        + "miner #" + this.minerId + " gets 100 VC\n"
         + "Id: " + this.id + "\n"
         + "Timestamp: " + this.timeStamp + "\n"
         + "Magic number: " + this.magicNumber + "\n"
@@ -59,13 +60,13 @@ public class Block implements Serializable {
   }
 
   public String messagesToString() {
-    return chatMessages.isEmpty() ? "Empty block\n" : chatMessages.stream()
-        .map(m -> String.valueOf(m.getId()).concat(" - ").concat(m.getText()).concat("\n"))
+    return transactions.isEmpty() ? "No transactions\n" : transactions.stream()
+        .map(m -> "ID: ".concat(String.valueOf(m.getId()).concat(" - ").concat(m.getText()).concat("\n")))
         .collect(Collectors.joining());
   }
 
-  public List<Message> getMessages() {
-    return chatMessages;
+  public List<Transaction> getMessages() {
+    return transactions;
   }
 
 }
