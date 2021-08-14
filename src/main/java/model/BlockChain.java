@@ -1,5 +1,6 @@
 package model;
 
+import exceptions.NoSelfTransactionException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.InvalidKeyException;
@@ -94,7 +95,9 @@ public class BlockChain implements Serializable {
       InvalidKeySpecException,
       NotEnoughCoinsException
   {
-    if (usersCoins.get(sender) <= 0 || usersCoins.get(sender) < amount) {
+    if (sender.equals(receiver)) {
+      throw new NoSelfTransactionException(sender);
+    } else if (usersCoins.get(sender) <= 0 || usersCoins.get(sender) < amount) {
       throw new NotEnoughCoinsException(sender);
     } else {
       transferCoins(sender, amount, receiver);
