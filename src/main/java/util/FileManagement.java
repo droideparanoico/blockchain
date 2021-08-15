@@ -11,13 +11,13 @@ import java.io.ObjectOutputStream;
 
 public final class FileManagement {
 
-  private static final String BLOCKCHAIN = "blockChain.txt";
+  private static final String BLOCKCHAIN = "blockchain.txt";
 
   private FileManagement() {
     throw new IllegalStateException("FileManagement class");
   }
 
-  public static void saveBlockChain(final Object obj) throws IOException {
+  public static void saveBlockchain(final Object obj) throws IOException {
     final FileOutputStream fos = new FileOutputStream(BLOCKCHAIN);
     final BufferedOutputStream bos = new BufferedOutputStream(fos);
     final ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -25,7 +25,7 @@ public final class FileManagement {
     oos.close();
   }
 
-  public static Object loadBlockChain() throws IOException, ClassNotFoundException {
+  public static Object loadBlockchain() throws IOException, ClassNotFoundException {
     final FileInputStream fis = new FileInputStream(BLOCKCHAIN);
     final BufferedInputStream bis = new BufferedInputStream(fis);
     final ObjectInputStream ois = new ObjectInputStream(bis);

@@ -3,7 +3,7 @@ import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
-import model.BlockChain;
+import model.Blockchain;
 import util.TransactionsGenerator;
 import model.Miner;
 import util.FileManagement;
@@ -14,7 +14,7 @@ public final class Main {
     public static void main(final String[] args) throws InterruptedException, IOException {
 
         final var nThreads = Runtime.getRuntime().availableProcessors();
-        final var blockChain = BlockChain.getInstance();
+        final var blockchain = Blockchain.getInstance();
 
         // Cryptographic keys management
         final File publicKey = new File(Security.PUBLIC_KEY);
@@ -27,13 +27,13 @@ public final class Main {
         final var transactionsExecutor = Executors.newScheduledThreadPool(nThreads);
 
         // Mocks a generator to send transactions into the blockchain
-        transactionsExecutor.scheduleAtFixedRate(new TransactionsGenerator(blockChain), 0, 200, TimeUnit.MILLISECONDS);
+        transactionsExecutor.scheduleAtFixedRate(new TransactionsGenerator(blockchain), 0, 200, TimeUnit.MILLISECONDS);
 
         final var minerExecutor = Executors.newFixedThreadPool(nThreads);
 
         // Creation of 15 miners
         IntStream.range(0, 15)
-            .mapToObj(minerId -> new Miner(minerId, blockChain))
+            .mapToObj(minerId -> new Miner(minerId, blockchain))
             .forEach(minerExecutor::submit);
 
         minerExecutor.shutdown();
@@ -48,7 +48,7 @@ public final class Main {
             transactionsExecutor.shutdownNow();
         }
 
-        FileManagement.saveBlockChain(blockChain);
+        FileManagement.saveBlockchain(blockchain);
 
     }
 

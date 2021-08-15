@@ -13,24 +13,24 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import model.BlockChain;
+import model.Blockchain;
 import model.Miner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class BlockChainTest {
+class BlockchainTest {
 
   private final int nThreads = Runtime.getRuntime().availableProcessors();
   private List<Miner> miners;
-  private BlockChain blockChain;
+  private Blockchain blockchain;
 
   @BeforeEach
   public void setUp() {
-    blockChain = new BlockChain();
-    blockChain.acceptUser("tester1", 100);
-    blockChain.acceptUser("tester2", 100);
+    blockchain = new Blockchain();
+    blockchain.acceptUser("tester1", 100);
+    blockchain.acceptUser("tester2", 100);
     miners = IntStream.range(0, 5)
-        .mapToObj(minerId -> new Miner(minerId, blockChain))
+        .mapToObj(minerId -> new Miner(minerId, blockchain))
         .collect(Collectors.toList());
   }
 
@@ -41,8 +41,8 @@ class BlockChainTest {
     final var minerExecutor = Executors.newFixedThreadPool(nThreads);
 
     for (final Miner miner: miners){
-      blockChain.acceptTransaction(blockChain.getNextTransactionId(), "tester1", 10, "tester2");
-      blockChain.acceptTransaction(blockChain.getNextTransactionId(), "tester2", 10, "tester1");
+      blockchain.acceptTransaction(blockchain.getNextTransactionId(), "tester1", 10, "tester2");
+      blockchain.acceptTransaction(blockchain.getNextTransactionId(), "tester2", 10, "tester1");
       minerExecutor.execute(miner);
     }
 
@@ -52,14 +52,14 @@ class BlockChainTest {
       minerExecutor.shutdownNow();
     }
 
-    assertTrue(blockChain.validateBlockchain());
+    assertTrue(blockchain.validateBlockchain());
   }
 
   @Test
   void block_chain_not_enough_coins_test() {
     final NotEnoughCoinsException thrown = assertThrows(
         NotEnoughCoinsException.class,
-        () -> blockChain.acceptTransaction(
+        () -> blockchain.acceptTransaction(
             1,
             "tester1",
             110,
@@ -72,7 +72,7 @@ class BlockChainTest {
   void block_chain_not_self_transaction_test() {
     final NoSelfTransactionException thrown = assertThrows(
         NoSelfTransactionException.class,
-        () -> blockChain.acceptTransaction(
+        () -> blockchain.acceptTransaction(
             1,
             "tester1",
             10,

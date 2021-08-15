@@ -2,14 +2,7 @@ package util;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
-import model.BlockChain;
-import exceptions.NotEnoughCoinsException;
-
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
+import model.Blockchain;
 import java.util.Random;
 
 public class TransactionsGenerator implements Runnable {
@@ -20,11 +13,11 @@ public class TransactionsGenerator implements Runnable {
         "Thom", "Jonny", "Ed", "Colin", "Phil"
     ).toArray(String[]::new);
 
-    private final BlockChain blockChain;
+    private final Blockchain blockchain;
 
-    public TransactionsGenerator(final BlockChain blockChain) {
-        this.blockChain = blockChain;
-        if (blockChain.getUsersCoins().isEmpty()) {
+    public TransactionsGenerator(final Blockchain blockchain) {
+        this.blockchain = blockchain;
+        if (blockchain.getUsersCoins().isEmpty()) {
             setInitialUserCoins();
         }
     }
@@ -32,20 +25,18 @@ public class TransactionsGenerator implements Runnable {
     @Override
     public void run() {
         try {
-            blockChain.acceptTransaction(
-                blockChain.getNextTransactionId(),
+            blockchain.acceptTransaction(
+                blockchain.getNextTransactionId(),
                 getRandomUserName(),
                 getRandomAmount(),
                 getRandomUserName()
             );
-        } catch (final NoSuchAlgorithmException |
-            SignatureException |
-            InvalidKeyException |
-            IOException |
-            InvalidKeySpecException |
-            NotEnoughCoinsException e)
-        {
-            e.printStackTrace();
+/*
+        Catching throwable instead of exception to avoid ScheduledExecutorService from stop working
+        because any thrown exception or error reaching the executor causes the executor to halt.
+*/
+        } catch (final Throwable t) {
+            t.printStackTrace();
         }
     }
 
@@ -55,13 +46,13 @@ public class TransactionsGenerator implements Runnable {
 
     private int getRandomAmount(){
         final int MIN_AMOUNT = 1;
-        final int MAX_AMOUNT = 100;
+        final int MAX_AMOUNT = 50;
 
         return random.nextInt((MAX_AMOUNT - MIN_AMOUNT) + 1) + MIN_AMOUNT;
     }
 
     private void setInitialUserCoins() {
-        Arrays.stream(userNames).forEach(userName -> blockChain.acceptUser(userName, INITIAL_COINS));
+        Arrays.stream(userNames).forEach(userName -> blockchain.acceptUser(userName, INITIAL_COINS));
     }
 
 }

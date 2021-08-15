@@ -23,7 +23,7 @@ public class Transaction implements Serializable  {
         final PublicKey publicKey
     ) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         this.id = id;
-        this.text = sender + " sent " + amount + " VC to " + receiver;
+        this.text = sender + " sent " + amount + " KarmaCoins to " + receiver;
         this.signature = Security.sign(text, privateKey);
         this.publicKey = publicKey;
     }

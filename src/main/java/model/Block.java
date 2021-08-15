@@ -48,7 +48,7 @@ public class Block implements Serializable {
   public String toString() {
     return "Block: " + "\n"
         + "Created by miner #" + this.minerId + "\n"
-        + "miner #" + this.minerId + " gets 100 VC\n"
+        + "miner #" + this.minerId + " gets 100 KarmaCoins\n"
         + "Id: " + this.id + "\n"
         + "Timestamp: " + this.timeStamp + "\n"
         + "Magic number: " + this.magicNumber + "\n"
@@ -61,7 +61,7 @@ public class Block implements Serializable {
 
   public String messagesToString() {
     return transactions.isEmpty() ? "No transactions\n" : transactions.stream()
-        .map(m -> "ID: ".concat(String.valueOf(m.getId()).concat(" - ").concat(m.getText()).concat("\n")))
+        .map(m -> "Id: ".concat(String.valueOf(m.getId()).concat(" - ").concat(m.getText()).concat("\n")))
         .collect(Collectors.joining());
   }
 

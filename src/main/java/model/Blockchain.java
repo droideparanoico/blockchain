@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.valueOf;
 
-public class BlockChain implements Serializable {
+public class Blockchain implements Serializable {
 
   private static final long serialVersionUID = 1L;
   private static final float LOWER_LIMIT_SECS = 0.1F;
@@ -35,17 +35,17 @@ public class BlockChain implements Serializable {
   private int magicNumber;
   private float generationSecs = 0;
 
-  public static BlockChain getInstance() {
+  public static Blockchain getInstance() {
     try {
-      final BlockChain blockChain = (BlockChain) FileManagement.loadBlockChain();
-      if (!blockChain.validateBlockchain()) {
+      final Blockchain blockchain = (Blockchain) FileManagement.loadBlockchain();
+      if (!blockchain.validateBlockchain()) {
         System.out.println("Blockchain not valid! Creating new one");
-        return new BlockChain();
+        return new Blockchain();
       } else {
-        return blockChain;
+        return blockchain;
       }
     } catch (final ClassNotFoundException | IOException e) {
-      return new BlockChain();
+      return new Blockchain();
     }
   }
 

@@ -3,16 +3,16 @@ package model;
 public class Miner implements Runnable {
 
   private final int minerId;
-  private final BlockChain blockChain;
+  private final Blockchain blockchain;
 
-  public Miner(final int minerId, final BlockChain blockChain) {
+  public Miner(final int minerId, final Blockchain blockchain) {
     this.minerId = minerId;
-    this.blockChain = blockChain;
+    this.blockchain = blockchain;
   }
 
   @Override
   public void run() {
-    blockChain.addBlock(minerId);
+    blockchain.addBlock(minerId);
   }
 
 }
